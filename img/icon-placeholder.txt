@@ -1,0 +1,18 @@
+# App Icons
+
+Create these icons for PWA support:
+
+1. icon-192.png - 192x192 pixels
+2. icon-512.png - 512x512 pixels
+
+Use Tabler Icons "world-download" icon:
+- Color: #3b82f6 (blue)
+- Background: #0f172a (dark)
+- Style: Minimalist, modern
+
+You can generate these icons using:
+- https://favicon.io/
+- https://realfavicongenerator.net/
+- Or create manually with any image editor
+
+Place the generated PNG files in this directory with the exact filenames specified above.

@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SoundEarth - Free World Ambient Sounds</title>
+    <meta name="description" content="100% free world map of city white noise - no ads, open source. Explore ambient sounds from Tokyo rain to Iceland waterfalls.">
+    <meta name="keywords" content="ambient sounds, white noise, Tokyo rain, nature sounds, free audio, sound map">
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Tabler Icons -->
+    <link rel="stylesheet" href="https://unpkg.com/tabler-icons@latest/iconfont/tabler-icons.min.css">
+    
+    <!-- Leaflet CSS for free maps -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
+    <!-- PWA -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0f172a">
+    
+    <!-- Cloudflare Analytics -->
+    <script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "your-token-here"}'></script>
+    
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+            background-attachment: fixed;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        /* 星空背景效果 */
+        .stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+        
+        .star {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle 3s infinite;
+        }
+        
+        @keyframes twinkle {
+            0%, 100% { opacity: 0; }
+            50% { opacity: 1; }
+        }
+        
+        /* 霓虹发光效果 */
+        .neon-glow {
+            box-shadow: 0 0 20px rgba(99, 102, 241, 0.5), 0 0 40px rgba(99, 102, 241, 0.3), 0 0 60px rgba(99, 102, 241, 0.1);
+        }
+        
+        /* 高级玻璃态效果 */
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+        
+        .glass-effect:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        /* 悬浮提升效果 */
+        .hover-lift {
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        
+        .hover-lift:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+        }
+        
+        /* 脉冲动画 */
+        .location-dot {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { 
+                opacity: 1; 
+                transform: scale(1);
+                box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.7);
+            }
+            50% { 
+                opacity: 0.8; 
+                transform: scale(1.1);
+                box-shadow: 0 0 0 10px rgba(99, 102, 241, 0);
+            }
+        }
+        
+        /* 浮动动画 */
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0px) rotate(0deg);
+            }
+            25% {
+                transform: translateY(-10px) rotate(-2deg);
+            }
+            75% {
+                transform: translateY(-5px) rotate(2deg);
+            }
+        }
+        
+        .float-animation {
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        /* 渐变文字效果 */
+        .gradient-text {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            background-size: 200% 200%;
+            animation: gradientShift 3s ease infinite;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        /* 光效扫描 */
+        .scan-line {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .scan-line::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            animation: scan 2s infinite;
+        }
+        
+        @keyframes scan {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+        
+        /* 地图样式 */
+        .world-map {
+            filter: drop-shadow(0 0 30px rgba(99, 102, 241, 0.4));
+            border-radius: 20px;
+        }
+        
+        /* 弹出窗口样式 */
+        .leaflet-popup-content-wrapper {
+            background: rgba(15, 12, 41, 0.9) !important;
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(99, 102, 241, 0.3) !important;
+            border-radius: 16px !important;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5) !important;
+        }
+        
+        .leaflet-popup-tip {
+            background: rgba(15, 12, 41, 0.9) !important;
+            border: 1px solid rgba(99, 102, 241, 0.3) !important;
+        }
+        
+        /* 音频播放器样式 */
+        .audio-player {
+            background: rgba(15, 12, 41, 0.7) !important;
+            backdrop-filter: blur(20px);
+            border-radius: 20px !important;
+            border: 1px solid rgba(255, 255, 255, 0.1) !important;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3) !important;
+        }
+        
+        /* 按钮效果 */
+        .cyber-button {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border: none;
+            border-radius: 50px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .cyber-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.5s;
+        }
+        
+        .cyber-button:hover::before {
+            left: 100%;
+        }
+        
+        .cyber-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+        
+        /* 滚动条样式 */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(135deg, #764ba2, #667eea);
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .glass-effect {
+                margin: 1rem;
+                padding: 1.5rem;
+            }
+            
+            .hover-lift:hover {
+                transform: translateY(-4px) scale(1.01);
+            }
+        }
+    </style>
+</head>
+<body class="min-h-screen text-white">
+    <!-- 星空背景 -->
+    <div class="stars" id="stars"></div>
+    
+    <div class="container mx-auto px-4 py-8">
+        <!-- Header -->
+        <header class="text-center mb-8">
+            <div class="glass-effect rounded-2xl p-8 mb-8 neon-glow hover-lift scan-line">
+                <div class="float-animation">
+                    <h1 class="text-6xl md:text-7xl font-bold mb-4">
+                        <span class="gradient-text">🌍 Sound Earth</span>
+                    </h1>
+                    <p class="text-2xl text-purple-200 font-light tracking-wider mb-6">
+                        探索世界 · 聆听自然 · 感受声音的魅力
+                    </p>
+                    <div class="flex justify-center items-center space-x-4">
+                        <span class="w-3 h-3 bg-purple-400 rounded-full animate-pulse neon-glow"></span>
+                        <span class="w-3 h-3 bg-blue-400 rounded-full animate-pulse neon-glow" style="animation-delay: 0.3s"></span>
+                        <span class="w-3 h-3 bg-pink-400 rounded-full animate-pulse neon-glow" style="animation-delay: 0.6s"></span>
+                    </div>
+                </div>
+                <div class="mt-6 flex justify-center space-x-6 text-sm text-purple-300">
+                    <span class="flex items-center"><i class="ti ti-world mr-2"></i>全球声音</span>
+                    <span class="flex items-center"><i class="ti ti-volume mr-2"></i>高保真音质</span>
+                    <span class="flex items-center"><i class="ti ti-shield mr-2"></i>100%免费</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- World Map -->
+        <div class="max-w-7xl mx-auto mb-8">
+            <div class="glass-effect rounded-3xl p-8 hover-lift neon-glow">
+                <div class="flex items-center justify-center mb-6">
+                    <div class="text-center">
+                        <h2 class="text-4xl font-bold mb-3">
+                            <span class="gradient-text">🗺️ 互动世界地图</span>
+                        </h2>
+                        <p class="text-purple-200 text-lg">探索全球各地的自然声音与城市氛围</p>
+                    </div>
+                </div>
+                <div id="map" class="h-[500px] w-full rounded-2xl world-map bg-gradient-to-br from-indigo-900/30 to-purple-900/30 border border-purple-400/20"></div>
+                <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+                    <div class="glass-effect rounded-xl p-4">
+                        <i class="ti ti-map-pin text-2xl text-purple-400 mb-2"></i>
+                        <p class="text-purple-200 text-sm">6个精选地点</p>
+                    </div>
+                    <div class="glass-effect rounded-xl p-4">
+                        <i class="ti ti-clock text-2xl text-blue-400 mb-2"></i>
+                        <p class="text-purple-200 text-sm">真实环境录音</p>
+                    </div>
+                    <div class="glass-effect rounded-xl p-4">
+                        <i class="ti ti-wifi text-2xl text-pink-400 mb-2"></i>
+                        <p class="text-purple-200 text-sm">在线即时播放</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Audio Player -->
+        <div class="max-w-4xl mx-auto">
+            <div id="audio-container" class="glass-effect rounded-3xl p-10 hover-lift neon-glow">
+                <!-- Initial State -->
+                <div id="location-info" class="text-center">
+                    <div class="mb-8">
+                        <div class="text-9xl mb-6 float-animation">🎵</div>
+                        <h3 class="text-4xl font-bold mb-4">
+                            <span class="gradient-text">开始您的声音之旅</span>
+                        </h3>
+                        <p class="text-xl text-purple-200 mb-8">点击地图上的彩色标记，探索世界各地的声音</p>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+                            <div class="glass-effect rounded-xl p-6 hover-lift flex flex-col items-center justify-center min-h-[120px]">
+                                <div class="text-4xl mb-3 animate-pulse">🏔️</div>
+                                <i class="ti ti-mountain text-3xl text-green-400 mb-3"></i>
+                                <p class="text-purple-200 text-sm font-medium text-center">山川自然</p>
+                                <p class="text-purple-300 text-xs mt-1">瀑布、溪流、森林</p>
+                            </div>
+                            <div class="glass-effect rounded-xl p-6 hover-lift flex flex-col items-center justify-center min-h-[120px]">
+                                <div class="text-4xl mb-3 animate-pulse">🏙️</div>
+                                <p class="text-purple-200 text-sm font-medium text-center">城市声音</p>
+                                <p class="text-purple-300 text-xs mt-1">地铁、街道、人群</p>
+                            </div>
+                            <div class="glass-effect rounded-xl p-6 hover-lift flex flex-col items-center justify-center min-h-[120px]">
+                                <div class="text-4xl mb-3 animate-pulse">🌦️</div>
+                                <p class="text-purple-200 text-sm font-medium text-center">天气氛围</p>
+                                <p class="text-purple-300 text-xs mt-1">雨声、雷声、风声</p>
+                            </div>
+                            <div class="glass-effect rounded-xl p-6 hover-lift flex flex-col items-center justify-center min-h-[120px]">
+                                <div class="text-4xl mb-3 animate-pulse">🐾</div>
+                                <i class="ti ti-paw text-3xl text-yellow-400 mb-3"></i>
+                                <p class="text-purple-200 text-sm font-medium text-center">动物声音</p>
+                                <p class="text-purple-300 text-xs mt-1">鸟鸣、昆虫、野生动物</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Player State -->
+                <div id="player-controls" class="hidden" style="transition: opacity 0.5s ease;">
+                    <!-- Location Info -->
+                    <div class="text-center mb-6">
+                        <div id="location-icon" class="text-5xl mb-3 animate-pulse">🌍</div>
+                        <h3 id="current-location" class="text-3xl font-bold text-white mb-3 gradient-text"></h3>
+                        <div id="audio-status" class="text-sm text-purple-200 bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-full px-4 py-2 inline-block glass-effect">
+                            准备播放
+                        </div>
+                    </div>
+
+                    <!-- Progress Bar -->
+                    <div class="mb-6">
+                        <div class="flex justify-between text-sm text-purple-200 mb-2">
+                            <span id="current-time">0:00</span>
+                            <span id="duration">0:00</span>
+                        </div>
+                        <div class="bg-white/20 rounded-full h-2 overflow-hidden">
+                            <div id="progress-bar" class="bg-gradient-to-r from-purple-400 to-pink-400 h-full w-0 transition-all duration-300 rounded-full"></div>
+                        </div>
+                    </div>
+
+                    <!-- Controls -->
+                    <div class="flex items-center justify-center space-x-8">
+                        <button id="prev-btn" class="cyber-button p-4 rounded-full hover:scale-110 transition-all duration-200 hover:shadow-lg hover:shadow-purple-500/50">
+                            <i class="ti ti-player-skip-back text-xl"></i>
+                        </button>
+                        
+                        <button id="play-btn" class="cyber-button bg-gradient-to-r from-green-400 via-emerald-500 to-teal-500 p-8 rounded-full hover:scale-110 transition-all duration-300 hover:shadow-2xl hover:shadow-green-500/60 shadow-green-500/40 shadow-xl group relative overflow-hidden">
+                            <div class="absolute inset-0 bg-gradient-to-r from-green-300/20 to-teal-300/20 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                            <i class="ti ti-player-play-filled text-4xl relative z-10"></i>
+                        </button>
+                        
+                        <button id="pause-btn" class="cyber-button bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 p-8 rounded-full hover:scale-110 transition-all duration-300 hover:shadow-2xl hover:shadow-orange-500/60 shadow-orange-500/40 shadow-xl group relative overflow-hidden hidden">
+                            <div class="absolute inset-0 bg-gradient-to-r from-yellow-300/20 to-red-300/20 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                            <i class="ti ti-player-pause-filled text-4xl relative z-10"></i>
+                        </button>
+                        
+                        <button id="stop-btn" class="cyber-button p-4 rounded-full hover:scale-110 transition-all duration-200 hover:shadow-lg hover:shadow-purple-500/50">
+                            <i class="ti ti-player-stop text-xl"></i>
+                        </button>
+                        
+                        <button id="next-btn" class="cyber-button p-4 rounded-full hover:scale-110 transition-all duration-200 hover:shadow-lg hover:shadow-purple-500/50">
+                            <i class="ti ti-player-skip-forward text-xl"></i>
+                        </button>
+                    </div>
+
+                    <!-- Audio Element -->
+                    <div class="mt-6">
+                        <audio id="audio-player" class="hidden">
+                            您的浏览器不支持音频播放。
+                        </audio>
+                        <div class="text-center">
+                            <div class="inline-flex items-center space-x-2 text-xs text-purple-200">
+                                <i class="ti ti-volume"></i>
+                                <span>MP3 • 128kbps • 高品质音频</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="text-center mt-16">
+            <div class="glass-effect rounded-3xl p-8 hover-lift neon-glow inline-block">
+                <div class="mb-6">
+                    <h3 class="text-2xl font-bold mb-3">
+                        <span class="gradient-text">Sound Earth</span>
+                    </h3>
+                    <p class="text-purple-300 text-sm">用爱打造，采用现代网络技术</p>
+                </div>
+                
+                <div class="flex justify-center space-x-6 mb-6">
+                    <span class="text-3xl animate-pulse">❤️</span>
+                    <span class="text-3xl animate-pulse" style="animation-delay: 0.3s">🌍</span>
+                    <span class="text-3xl animate-pulse" style="animation-delay: 0.6s">🎵</span>
+                </div>
+                
+                <div class="flex justify-center space-x-6 text-sm">
+                    <a href="https://github.com/soundearth/soundearth.github.io" class="text-purple-300 hover:text-purple-200 transition-colors">
+                        <i class="ti ti-brand-github mr-1"></i>GitHub
+                    </a>
+                    <a href="#" class="text-purple-300 hover:text-purple-200 transition-colors">
+                        <i class="ti ti-share mr-1"></i>分享
+                    </a>
+                    <a href="#" class="text-purple-300 hover:text-purple-200 transition-colors">
+                        <i class="ti ti-heart mr-1"></i>支持
+                    </a>
+                </div>
+                
+                <div class="mt-4 text-xs text-purple-400">
+                    Made with 💜 for the world
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        // 生成星空背景
+        function createStars() {
+            const starsContainer = document.getElementById('stars');
+            const numberOfStars = 100;
+            
+            for (let i = 0; i < numberOfStars; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                star.style.animationDelay = Math.random() * 3 + 's';
+                star.style.animationDuration = (Math.random() * 3 + 2) + 's';
+                starsContainer.appendChild(star);
+            }
+        }
+        
+        // 页面加载完成后创建星空
+        document.addEventListener('DOMContentLoaded', createStars);
+    </script>
+    <script src="app.js"></script>
+</body>
+</html>
