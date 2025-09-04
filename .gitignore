@@ -1,5 +1,4 @@
 # Audio files (use Git LFS for actual audio)
-*.mp3
 *.wav
 *.flac
 *.m4a
