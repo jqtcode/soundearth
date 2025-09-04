@@ -43,7 +43,7 @@ class SoundEarth {
         
         // 检查每个音频文件
         Object.keys(this.audioFiles).forEach(filename => {
-            const audio = new Audio(`./audio/${filename}`);
+            const audio = new Audio(`/audio/${filename}`);
             audio.preload = 'metadata';
             audio.onerror = () => console.error(`无法加载音频文件: ${filename}`);
         });
