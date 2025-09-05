@@ -6,8 +6,7 @@ const urlsToCache = [
   '/app.js',
   '/manifest.json',
   'https://cdn.tailwindcss.com',
-  'https://unpkg.com/tabler-icons@latest/iconfont/tabler-icons.min.css',
-  'https://static.cloudflareinsights.com/beacon.min.js'
+  'https://unpkg.com/tabler-icons@latest/iconfont/tabler-icons.min.css'
 ];
 
 // Install event - cache resources

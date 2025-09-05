@@ -34,7 +34,6 @@ class SoundEarth {
     preloadAudioFiles() {
         // 预加载音频文件以确保可用性
         this.audioFiles = {
-            'tokyo-rain.mp3': '东京雨声',
             'iceland-waterfall.mp3': '冰岛瀑布',
             'sahara-wind.mp3': '撒哈拉风声',
             'kyoto-birds.mp3': '京都鸟鸣',
@@ -87,14 +86,6 @@ class SoundEarth {
 
             // 定义位置数据
             this.locations = [
-                {
-                    name: "东京雨声",
-                    lat: 35.6762,
-                    lng: 139.6503,
-                    file: "tokyo-rain.mp3",
-                    icon: "🌧️",
-                    color: "#ef4444"
-                },
                 {
                     name: "冰岛瀑布",
                     lat: 64.1466,
@@ -270,7 +261,7 @@ class SoundEarth {
     }
 
     setupProgressBar() {
-        const progressContainer = document.querySelector('.bg-white/20');
+        const progressContainer = document.querySelector('.bg-white-20');
         if (progressContainer) {
             // 点击进度条
             progressContainer.addEventListener('click', (e) => this.seekTo(e));
@@ -296,7 +287,7 @@ class SoundEarth {
     handleDrag(e) {
         if (!this.isDragging) return;
         
-        const progressContainer = document.querySelector('.bg-white/20');
+        const progressContainer = document.querySelector('.bg-white-20');
         const rect = progressContainer.getBoundingClientRect();
         
         let clientX;
@@ -448,7 +439,7 @@ class SoundEarth {
     seekTo(e) {
         if (this.isDragging) return;
         
-        const progressContainer = document.querySelector('.bg-white/20');
+        const progressContainer = document.querySelector('.bg-white-20');
         const rect = progressContainer.getBoundingClientRect();
         const clickX = e.clientX - rect.left;
         const width = rect.width;
