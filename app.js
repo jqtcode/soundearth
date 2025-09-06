@@ -32,7 +32,7 @@ class SoundEarth {
     }
 
     preloadAudioFiles() {
-        // 预加载音频文件以确保可用性
+        // 音频文件映射 - 使用GitHub Pages本地音频文件
         this.audioFiles = {
             'iceland-waterfall.mp3': '冰岛瀑布',
             'sahara-wind.mp3': '撒哈拉风声',
@@ -40,9 +40,17 @@ class SoundEarth {
             'nyc-subway.mp3': '纽约地铁'
         };
         
-        // 检查每个音频文件
+        // GitHub Pages音频文件路径（相对路径）
+        this.audioUrls = {
+            'nyc-subway.mp3': './audio/nyc-subway.mp3',
+            'sahara-wind.mp3': './audio/sahara-wind.mp3',
+            'iceland-waterfall.mp3': './audio/iceland-waterfall.mp3',
+            'kyoto-birds.mp3': './audio/kyoto-birds.mp3'
+        };
+        
+        // 预加载检查 - 使用本地音频文件
         Object.keys(this.audioFiles).forEach(filename => {
-            const audio = new Audio(`./audio/${filename}`);
+            const audio = new Audio(this.audioUrls[filename]);
             audio.preload = 'metadata';
             audio.onerror = () => console.error(`无法加载音频文件: ${filename}`);
         });
@@ -333,8 +341,8 @@ class SoundEarth {
             this.playerControls.style.opacity = '1';
         }, 50);
         
-        // 设置音频源
-        const audioPath = `./audio/${filename}`;
+        // 设置音频源 - 使用GitHub Pages本地音频文件
+        const audioPath = this.audioUrls[filename];
         this.audioPlayer.src = audioPath;
         
         // 重置进度条

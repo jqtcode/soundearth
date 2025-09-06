@@ -107,14 +107,28 @@ ffmpeg -i input.wav -b:a 128k -ac 1 -ar 44100 tokyo-rain-128k.mp3
 
 ### GitHub Pages部署修复指南
 
-#### 路径修复清单
-1. **app.js**：将音频路径改为相对路径
-   ```javascript
-   // 更改前
-   const audio = new Audio(`/audio/${filename}`);
-   // 更改后
-   const audio = new Audio(`./audio/${filename}`);
-   ```
+#### 音频路径配置（已优化）
+**当前配置**：使用GitHub Pages本地音频文件，确保部署后正常播放
+
+**音频文件路径**：
+```javascript
+// GitHub Pages音频文件路径（相对路径）
+this.audioUrls = {
+    'nyc-subway.mp3': './audio/nyc-subway.mp3',
+    'sahara-wind.mp3': './audio/sahara-wind.mp3',
+    'iceland-waterfall.mp3': './audio/iceland-waterfall.mp3',
+    'kyoto-birds.mp3': './audio/kyoto-birds.mp3'
+};
+```
+
+**部署验证**：
+1. 所有音频文件已包含在`audio/`目录中
+2. 使用相对路径确保GitHub Pages正确访问
+3. 无需担心跨域问题
+
+**如需外链支持**：
+- 请确保外链支持直链访问（无需认证）
+- 推荐使用支持CORS的CDN服务
 
 2. **manifest.json**：所有路径使用相对路径
    ```json
