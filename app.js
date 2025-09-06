@@ -40,12 +40,13 @@ class SoundEarth {
             'nyc-subway.mp3': '纽约地铁'
         };
         
-        // GitHub Pages音频文件路径（优化路径）
+        // 音频文件路径 - 适配GitHub Pages和本地环境
+        const basePath = window.location.hostname === 'jqtcode.github.io' ? '/soundearth/' : './';
         this.audioUrls = {
-            'nyc-subway.mp3': 'audio/nyc-subway.mp3',
-            'sahara-wind.mp3': 'audio/sahara-wind.mp3',
-            'iceland-waterfall.mp3': 'audio/iceland-waterfall.mp3',
-            'kyoto-birds.mp3': 'audio/kyoto-birds.mp3'
+            'nyc-subway.mp3': `${basePath}audio/nyc-subway.mp3`,
+            'sahara-wind.mp3': `${basePath}audio/sahara-wind.mp3`,
+            'iceland-waterfall.mp3': `${basePath}audio/iceland-waterfall.mp3`,
+            'kyoto-birds.mp3': `${basePath}audio/kyoto-birds.mp3`
         };
         
         // 预加载检查 - 使用本地音频文件
@@ -347,7 +348,7 @@ class SoundEarth {
             this.playerControls.style.opacity = '1';
         }, 50);
         
-        // 设置音频源 - 使用GitHub Pages本地音频文件（优化路径）
+        // 设置音频源 - 适配GitHub Pages和本地环境
         const audioPath = this.audioUrls[filename];
         this.audioPlayer.src = audioPath;
         

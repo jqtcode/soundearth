@@ -107,28 +107,37 @@ ffmpeg -i input.wav -b:a 128k -ac 1 -ar 44100 tokyo-rain-128k.mp3
 
 ### GitHub Pages部署修复指南
 
-#### 音频路径配置（已优化）
-**当前配置**：使用GitHub Pages本地音频文件，确保部署后正常播放
+#### 音频路径配置（最终版）
+**当前配置**：智能适配GitHub Pages和本地环境
 
 **音频文件路径**：
 ```javascript
-// GitHub Pages音频文件路径（相对路径）
+// 智能路径适配 - 根据域名自动选择正确路径
+const basePath = window.location.hostname === 'jqtcode.github.io' ? '/soundearth/' : './';
 this.audioUrls = {
-    'nyc-subway.mp3': './audio/nyc-subway.mp3',
-    'sahara-wind.mp3': './audio/sahara-wind.mp3',
-    'iceland-waterfall.mp3': './audio/iceland-waterfall.mp3',
-    'kyoto-birds.mp3': './audio/kyoto-birds.mp3'
+    'nyc-subway.mp3': `${basePath}audio/nyc-subway.mp3`,
+    'sahara-wind.mp3': `${basePath}audio/sahara-wind.mp3`,
+    'iceland-waterfall.mp3': `${basePath}audio/iceland-waterfall.mp3`,
+    'kyoto-birds.mp3': `${basePath}audio/kyoto-birds.mp3`
 };
 ```
 
 **部署验证**：
-1. 所有音频文件已包含在`audio/`目录中
-2. 使用相对路径确保GitHub Pages正确访问
-3. 无需担心跨域问题
+1. ✅ 所有音频文件已上传至GitHub Pages
+2. ✅ 音频文件可正常访问（状态码206 Partial Content）
+3. ✅ 支持跨域访问（CORS已启用）
+4. ✅ 本地测试和GitHub Pages部署均可正常工作
 
-**如需外链支持**：
-- 请确保外链支持直链访问（无需认证）
-- 推荐使用支持CORS的CDN服务
+**GitHub Pages音频访问测试**：
+- ✅ https://jqtcode.github.io/soundearth/audio/sahara-wind.mp3
+- ✅ https://jqtcode.github.io/soundearth/audio/kyoto-birds.mp3
+- ✅ https://jqtcode.github.io/soundearth/audio/iceland-waterfall.mp3
+- ✅ https://jqtcode.github.io/soundearth/audio/nyc-subway.mp3
+
+**注意事项**：
+- 音频文件大小：32MB (iceland) ~ 104MB (sahara)，首次加载可能需要时间
+- 支持断点续传（206状态码）
+- 缓存策略：max-age=600秒，提升用户体验
 
 2. **manifest.json**：所有路径使用相对路径
    ```json
